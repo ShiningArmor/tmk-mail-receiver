@@ -12,6 +12,7 @@ class eg_email(peewee.Model):
     creado_por = peewee.IntegerField()
     asignado_a = peewee.IntegerField()
     asunto = peewee.CharField()
+    destinatario = peewee.CharField()
     detalle = peewee.TextField()
     e_mail = peewee.TextField()
     creado_el = peewee.DateTimeField()

@@ -77,6 +77,7 @@ def recibir_email(config):
             noti = NotificadorExterno()
             noti.creado_por =1
             # noti.asignado_a = 8
+            noti.destinatario = cuenta
             noti.creado_el = datetime.now().strftime('%Y-%m-%d %H:%M')
             noti.fecha_hora_inicio = noti.creado_el
             noti.asunto = tit[:255]
