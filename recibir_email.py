@@ -12,7 +12,7 @@ from email.parser import Parser
 from email.header import decode_header
 import os
 
-from models import eg_actividad as NotificadorExterno, eg_cuenta_de_email as configuracionBPM
+from models import eg_email as NotificadorExterno, eg_cuenta_de_email as configuracionBPM
 
 def recibir_email(config):
     # Se establece conexion con el servidor pop3
