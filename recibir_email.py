@@ -171,4 +171,8 @@ def main():
         
 
 if __name__ == '__main__':
-    main()
+    print "Start Email Receiver"
+    while True:
+        main()
+        time.sleep(30)
+
