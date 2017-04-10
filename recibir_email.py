@@ -36,65 +36,65 @@ def recibir_email(config):
         #print remitentes
         #for remitente in remitentes:
         try:
-            print (parseaddr(email['From'])[1].index(remitente))
-            if parseaddr(email['From'])[1].index(remitente)>=0:
-                #Se formatea la hora para guardarla en la BD
-                a = parsedate(email['Date'])
-                b = time.mktime(a)
-                c = datetime.fromtimestamp(int(b)).strftime('%Y-%m-%d %H:%M')
-                #''.join([ unicode(t[0], t[1] or default_charset) for t in dh ])
-                #Si es compuesto con HTML o texto plano ascii
-                default_charset = 'ascii'
-                tit = decode_header(email['Subject'])
-                tipo_mail = tit[0][1]
-                if tit[0][1]=='utf-8' or tit[0][1]==None:
-                    tit = ''.join([ unicode(t[0], t[1] or default_charset) for t in tit ])
-                    es_utf8= True
-                    for part in email.walk():
-                        parte=''
-                        if part.get_content_type()=="text/html":
-                            print 'html'
-                            part = sanitise(part)
-                            parte = part.get_payload(decode=True).decode(part.get_content_charset())
-                        else:
-                            print 'Texto plano'
-                            part = sanitise(part)
-                            parte = part.get_payload(decode=True)
-                else:
-                    for part in email.walk():
-                        parte=''
-                        if part.get_content_type()=="text/html":
-                            print 'html'
-                            part = sanitise(part)
-                            parte = part.get_payload(decode=True)
-                        else:
-                            print 'Texto plano'
-                            part = sanitise(part)
-                            parte = part.get_payload(decode=True)
+            #print (parseaddr(email['From'])[1].index(remitente))
+            #if parseaddr(email['From'])[1].index(remitente)>=0:
+            #Se formatea la hora para guardarla en la BD
+            a = parsedate(email['Date'])
+            b = time.mktime(a)
+            c = datetime.fromtimestamp(int(b)).strftime('%Y-%m-%d %H:%M')
+            #''.join([ unicode(t[0], t[1] or default_charset) for t in dh ])
+            #Si es compuesto con HTML o texto plano ascii
+            default_charset = 'ascii'
+            tit = decode_header(email['Subject'])
+            tipo_mail = tit[0][1]
+            if tit[0][1]=='utf-8' or tit[0][1]==None:
+                tit = ''.join([ unicode(t[0], t[1] or default_charset) for t in tit ])
+                es_utf8= True
+                for part in email.walk():
+                    parte=''
+                    if part.get_content_type()=="text/html":
+                        print 'html'
+                        part = sanitise(part)
+                        parte = part.get_payload(decode=True).decode(part.get_content_charset())
+                    else:
+                        print 'Texto plano'
+                        part = sanitise(part)
+                        parte = part.get_payload(decode=True)
+            else:
+                for part in email.walk():
+                    parte=''
+                    if part.get_content_type()=="text/html":
+                        print 'html'
+                        part = sanitise(part)
+                        parte = part.get_payload(decode=True)
+                    else:
+                        print 'Texto plano'
+                        part = sanitise(part)
+                        parte = part.get_payload(decode=True)
 
-                #Se guarda una instancia del Mail
-                cuenta = config.nombre
-                noti = NotificadorExterno()
-                noti.creado_por =1
-                noti.asignado_a = 8
-                noti.creado_el = datetime.now().strftime('%Y-%m-%d %H:%M')
-                noti.fecha_hora_inicio = noti.creado_el
-                noti.asunto = tit[:40]
-                noti.actividad = 'Email'
-                noti.estado = 'Iniciada'
-                noti.detalle = "- ['Remitente:" +parseaddr(email['From'])[1] + "', '1','" + datetime.now().strftime('%Y-%m-%d %H:%M') +"']" 
-                noti.e_mail = parte
-                
-                try:
-                    '''if NotificadorExterno.select().where():
-                        print 'YA EXISTE'
-                    else:'''
-                    noti.save()
-                    print noti.id
-                    print 'Se grabo!!!'
-                except Exception, e: 
-                    print ('NO SE GRABO!!!!')
-                    print repr(e)
+            #Se guarda una instancia del Mail
+            cuenta = config.nombre
+            noti = NotificadorExterno()
+            noti.creado_por =1
+            noti.asignado_a = 8
+            noti.creado_el = datetime.now().strftime('%Y-%m-%d %H:%M')
+            noti.fecha_hora_inicio = noti.creado_el
+            noti.asunto = tit[:40]
+            noti.actividad = 'Email'
+            noti.estado = 'Iniciada'
+            noti.detalle = "- ['Remitente:" +parseaddr(email['From'])[1] + "', '1','" + datetime.now().strftime('%Y-%m-%d %H:%M') +"']" 
+            noti.e_mail = parte
+            
+            try:
+                '''if NotificadorExterno.select().where():
+                    print 'YA EXISTE'
+                else:'''
+                noti.save()
+                print noti.id
+                print 'Se grabo!!!'
+            except Exception, e: 
+                print ('NO SE GRABO!!!!')
+                print repr(e)
         except Exception, e:
                 print e
 
