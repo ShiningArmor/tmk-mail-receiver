@@ -78,7 +78,8 @@ def recibir_email(config):
                         # parte = part.get_payload(decode=True)
                         print "attach type:", part.get_content_type()
                         attach = get_attach(part)
-                        attachments.append(attach)
+                        if attach:
+                            attachments.append(attach)
 
             else:
                 for part in email.walk():
@@ -225,6 +226,7 @@ def get_folder(email_id):
     newpath = str(current_path) + "/downloads/email_" + str(email_id)
     if not os.path.exists(newpath):
         os.makedirs(newpath)
+        print "newpath:", newpath
     return newpath
 
 
@@ -234,6 +236,7 @@ def save_attach_db(email_id, name, file_path):
     attach.file_path = file_path
     attach.name = name
     attach.save()
+    print "save attach index in DB!"
 
 
 
