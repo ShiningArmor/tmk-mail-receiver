@@ -2,6 +2,7 @@ from flask import request, url_for
 from flask.ext.api import FlaskAPI, status, exceptions
 from flask import send_from_directory
 from models import eg_email as NotificadorExterno, eg_cuenta_de_email as configuracionBPM, email_adjunto_api as attach_api
+import json
 
 app = FlaskAPI(__name__)
 

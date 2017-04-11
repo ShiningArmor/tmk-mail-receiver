@@ -3,8 +3,6 @@
 
 from datetime import datetime
 import time
-now = datetime.now()
-
 import smtplib
 import poplib
 from email.mime.text import MIMEText
@@ -14,8 +12,20 @@ from email.Utils import parsedate, parseaddr, formataddr
 from email.parser import Parser
 from email.header import decode_header
 import os
+import json
+from models import eg_email as NotificadorExterno, eg_cuenta_de_email as configuracionBPM, email_adjunto_api as AttachAPI
+now = datetime.now()
+settings = json.loads(open("settings.json").read())
+current_path = os.path.dirname(os.path.realpath(__file__))
+print "current_path:", current_path
 
-from models import eg_email as NotificadorExterno, eg_cuenta_de_email as configuracionBPM
+class Attachement(object):
+    def __init__(self):
+        self.data = None;
+        self.content_type = None;
+        self.size = None;
+        self.name = None;
+
 
 def recibir_email(config):
     # Se establece conexion con el servidor pop3
@@ -26,6 +36,7 @@ def recibir_email(config):
     numero = len(m.list()[1])
     print (numero)
     #obtener los mensajes para analizarlos
+    attachments = []
     for i in range (numero):
         print "Mensaje numero"+str(i+1)
         print "--------------------"
@@ -55,25 +66,31 @@ def recibir_email(config):
                 es_utf8= True
                 for part in email.walk():
                     parte=''
-                    if part.get_content_type()=="text/html":
-                        print 'html'
+                    if part.get_content_type()=="text/html" or part.get_content_type() == "text/plain":
+                        print part.get_content_type()
                         part = sanitise(part)
                         parte = part.get_payload(decode=True).decode(part.get_content_charset())
+
                     else:
-                        print 'Texto plano'
-                        part = sanitise(part)
-                        parte = part.get_payload(decode=True)
+                        # print 'Texto plano'
+                        # part = sanitise(part)
+                        # parte = part.get_payload(decode=True)
+                        attach = get_attach(part)
+                        attachments.append(attach)
+
             else:
                 for part in email.walk():
                     parte=''
-                    if part.get_content_type()=="text/html":
+                    if part.get_content_type()=="text/html" or part.get_content_type() == "text/plain":
                         print 'html'
                         part = sanitise(part)
                         parte = part.get_payload(decode=True)
                     else:
-                        print 'Texto plano'
-                        part = sanitise(part)
-                        parte = part.get_payload(decode=True)
+                        # print 'Texto plano'
+                        # part = sanitise(part)
+                        # parte = part.get_payload(decode=True)
+                        attach = get_attach(part)
+                        attachments.append(attach)
 
             #Se guarda una instancia del Mail
             cuenta = config.nombre
@@ -96,11 +113,18 @@ def recibir_email(config):
                 noti.save()
                 print noti.id
                 print 'Se grabo!!!'
+                for attach in attachments:
+                    print "save attach!"
+                    folder = get_folder(noti.id)
+                    pathfile = save_attach(folder, attach)
+                    save_attach_db(noti.id, attach.name, pathfile)
+
             except Exception, e: 
                 print ('NO SE GRABO!!!!')
                 print repr(e)
         except Exception, e:
                 print e
+
 
     poplist = m.list()
     if poplist[0].startswith('+OK') :
@@ -168,8 +192,48 @@ def sanitise(msg):
     return msg
 
 
+def get_attach(message_part):
+    content_disposition = message_part.get("Content-Disposition", None);
+    if content_disposition:
+        dispositions = content_disposition.strip().split(";");
+        if bool(content_disposition and dispositions[0].lower() == "attachment"):
+
+            attachment = Attachement();
+            attachment.data = message_part.get_payload(decode=True);
+            attachment.content_type = message_part.get_content_type();
+            attachment.size = len(attachment.data);
+            attachment.name = message_part.get_filename();
+
+            return attachment;
+
+    return None;
+
+def save_attach(folder, attach):
+    newfile = folder + str(attach.name)
+    file = open(newfile, 'w');
+    file.write(att.data);
+    file.close();
+    print "SAVE ATTACH", newfile
+    return newfile
+
+def get_folder(email_id):
+    newpath = str(current_path) + "/downloads/email_" + str(email_id)
+    if not os.path.exists(newpath):
+        os.makedirs(newpath)
+    return newpath
+
+
+def save_attach_db(email_id, name, file_path):
+    attach = AttachAPI()
+    attach.id_email = email_id
+    attach.file_path = file_path
+    attach.name = name
+    attach.save()
+
+
+
 def main():
-    cuentas = configuracionBPM.select().where(configuracionBPM.activo==True)
+    #cuentas = configuracionBPM.select().where(configuracionBPM.activo==True)
     for cta in cuentas:
         recibir_email(cta)
         
