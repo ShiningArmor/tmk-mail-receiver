@@ -29,6 +29,7 @@ class Attachement(object):
 
 def recibir_email(config):
     # Se establece conexion con el servidor pop3
+    print "Email", config.email
     m = poplib.POP3(config.servidor_pop3 , str(config.puerto_pop3))
     m.user(config.email)
     m.pass_(config.clave_email)
