@@ -215,10 +215,11 @@ def get_attach(message_part):
     return None;
 
 def save_attach(folder, attach):
+    print folder, attach.name
     newfile = folder + str(attach.name)
-    file = open(newfile, 'w');
-    file.write(att.data);
-    file.close();
+    file = open(newfile, 'w')
+    file.write(attach.data)
+    file.close()
     print "SAVE ATTACH", newfile
     return newfile
 
