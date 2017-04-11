@@ -36,3 +36,8 @@ class eg_cuenta_de_email(peewee.Model):
     lista_blanca = peewee.TextField()
     class Meta:
         database = db
+
+class email_adjunto_api(peewee.Model):
+    id = peewee.IntegerField()
+    id_email = peewee.IntegerField()
+    file_path = peewee.CharField()
