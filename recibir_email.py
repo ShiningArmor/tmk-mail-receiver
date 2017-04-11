@@ -233,7 +233,7 @@ def save_attach_db(email_id, name, file_path):
 
 
 def main():
-    #cuentas = configuracionBPM.select().where(configuracionBPM.activo==True)
+    cuentas = configuracionBPM.select().where(configuracionBPM.activo==True)
     for cta in cuentas:
         recibir_email(cta)
         
