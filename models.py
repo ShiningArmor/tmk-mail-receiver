@@ -41,3 +41,6 @@ class email_adjunto_api(peewee.Model):
     id = peewee.IntegerField()
     id_email = peewee.IntegerField()
     file_path = peewee.CharField()
+    name = peewee.CharField()
+    class Meta:
+        database = db
