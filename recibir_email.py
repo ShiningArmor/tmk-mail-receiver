@@ -76,6 +76,7 @@ def recibir_email(config):
                         # print 'Texto plano'
                         # part = sanitise(part)
                         # parte = part.get_payload(decode=True)
+                        print "attach type:", part.get_content_type()
                         attach = get_attach(part)
                         attachments.append(attach)
 
@@ -90,8 +91,10 @@ def recibir_email(config):
                         # print 'Texto plano'
                         # part = sanitise(part)
                         # parte = part.get_payload(decode=True)
+                        print "attach type:", part.get_content_type()
                         attach = get_attach(part)
-                        attachments.append(attach)
+                        if attach:
+                            attachments.append(attach)
 
             #Se guarda una instancia del Mail
             cuenta = config.nombre
@@ -195,6 +198,7 @@ def sanitise(msg):
 
 def get_attach(message_part):
     content_disposition = message_part.get("Content-Disposition", None);
+    print "content_disposition", content_disposition
     if content_disposition:
         dispositions = content_disposition.strip().split(";");
         if bool(content_disposition and dispositions[0].lower() == "attachment"):
