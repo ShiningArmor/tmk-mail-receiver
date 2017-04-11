@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import peewee
 import json
 settings = json.loads(open("settings.json").read())
