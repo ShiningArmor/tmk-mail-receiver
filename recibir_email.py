@@ -216,7 +216,7 @@ def get_attach(message_part):
 
 def save_attach(folder, attach):
     print folder, attach.name
-    newfile = folder + str(attach.name)
+    newfile = folder + "/" + str(attach.name)
     file = open(newfile, 'w')
     file.write(attach.data)
     file.close()
@@ -224,7 +224,7 @@ def save_attach(folder, attach):
     return newfile
 
 def get_folder(email_id):
-    newpath = str(current_path) + "/downloads/email_" + str(email_id)
+    newpath = str(current_path) + "/downloads/email_" + str(email_id) 
     if not os.path.exists(newpath):
         os.makedirs(newpath)
         print "newpath:", newpath
