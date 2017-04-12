@@ -14,6 +14,9 @@ from email.header import decode_header
 import os
 import json
 from models import eg_email as NotificadorExterno, eg_cuenta_de_email as configuracionBPM, email_adjunto_api as AttachAPI
+import poplib
+
+poplib._MAXLINE=20480
 now = datetime.now()
 settings = json.loads(open("settings.json").read())
 current_path = os.path.dirname(os.path.realpath(__file__))
