@@ -19,6 +19,8 @@ settings = json.loads(open("settings.json").read())
 current_path = os.path.dirname(os.path.realpath(__file__))
 print "current_path:", current_path
 
+WEB_URL = "http://192.168.0.38:5000"
+
 class Attachement(object):
     def __init__(self):
         self.data = None;
@@ -118,11 +120,19 @@ def recibir_email(config):
                 noti.save()
                 print noti.id
                 print 'Se grabo!!!'
+                auditable = []
                 for attach in attachments:
                     print "save attach!"
                     folder = get_folder(noti.id)
                     pathfile = save_attach(folder, attach)
-                    save_attach_db(noti.id, attach.name, pathfile)
+                    attach_db = save_attach_db(noti.id, attach.name, pathfile)
+                    audit = create_attach_link(attach_db)
+                    auditable.append(audit)
+                
+                if auditable:
+                    noti.adjuntos = "\n".join(auditable)
+                    noti.save()
+
 
             except Exception, e: 
                 print ('NO SE GRABO!!!!')
@@ -238,7 +248,15 @@ def save_attach_db(email_id, name, file_path):
     attach.name = name
     attach.save()
     print "save attach index in DB!"
+    return attach
 
+def create_attach_link(attach):
+    attach.link = WEB_URL + "/email/adjunto/"+ str(attach.id) + "/"
+    attach.save()
+    """2017-04-11 23:08"""
+    fecha = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+    to_auditable = """- ['<a href="XXLINKXX">XXNAMEXX</a>', '0', 'XXFECHAXX']""".replace("XXLINKXX",attach.link).replace("XXNAMEXX",attach.name).replace("XXFECHAXX",fecha)
+    return to_auditable
 
 
 def main():
