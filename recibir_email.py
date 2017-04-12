@@ -112,7 +112,7 @@ def recibir_email(config):
             noti.fecha_hora_inicio = noti.creado_el
             noti.asunto = tit[:255]
             noti.actividad = 'Email'
-            noti.estado = 'Iniciada'
+            noti.estado = 1
             noti.e_mail = parseaddr(email['From'])[1]
             noti.detalle = parte
             

@@ -21,7 +21,7 @@ class eg_email(peewee.Model):
     creado_el = peewee.DateTimeField()
     fecha_hora_inicio = peewee.DateTimeField()
     actividad = peewee.CharField()
-    estado = peewee.CharField()
+    estado = peewee.IntegerField()
     adjuntos = peewee.CharField()
     class Meta:
         database = db
