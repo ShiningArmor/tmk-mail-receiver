@@ -254,7 +254,7 @@ def create_attach_link(attach):
     attach.link = WEB_URL + "/email/adjunto/"+ str(attach.id) + "/"
     attach.save()
     """2017-04-11 23:08"""
-    fecha = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+    fecha = datetime.now().strftime("%Y-%m-%d %H:%M")
     to_auditable = """- ['<a href="XXLINKXX">XXNAMEXX</a>', '0', 'XXFECHAXX']""".replace("XXLINKXX",attach.link).replace("XXNAMEXX",attach.name).replace("XXFECHAXX",fecha)
     return to_auditable
 
