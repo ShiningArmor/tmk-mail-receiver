@@ -13,7 +13,7 @@ from email.parser import Parser
 from email.header import decode_header
 import os
 import json
-from models import eg_email as NotificadorExterno, eg_cuenta_de_email as configuracionBPM, email_adjunto_api as AttachAPI
+from models import db, eg_email as NotificadorExterno, eg_cuenta_de_email as configuracionBPM, email_adjunto_api as AttachAPI
 import poplib
 
 poplib._MAXLINE=20480
@@ -64,18 +64,24 @@ def recibir_email(config):
             c = datetime.fromtimestamp(int(b)).strftime('%Y-%m-%d %H:%M')
             #''.join([ unicode(t[0], t[1] or default_charset) for t in dh ])
             #Si es compuesto con HTML o texto plano ascii
-            default_charset = 'ascii'
+            # default_charset = 'ascii'
+	    default_charset = 'utf-8'
             tit = decode_header(email['Subject'])
             tipo_mail = tit[0][1]
             if tit[0][1]=='utf-8' or tit[0][1]==None:
-                tit = ''.join([ unicode(t[0], t[1] or default_charset) for t in tit ])
+		print "utf8 way"
+                t = unicode("")
+		tit = t.join([ unicode(t[0], t[1] or default_charset) for t in tit ])
                 es_utf8= True
                 for part in email.walk():
                     parte=''
-                    if part.get_content_type()=="text/html" or part.get_content_type() == "text/plain":
+                    print "content type:", part.get_content_type()
+		    if part.get_content_type()=="text/html" or part.get_content_type() == "text/plainXXX":
                         print part.get_content_type()
+			print "part pre sanitise", part
                         part = sanitise(part)
-                        parte = part.get_payload(decode=True).decode(part.get_content_charset())
+                        parte_utf = unicode(part.get_payload(decode=True).decode(part.get_content_charset()))
+			print "part post sanitise", parte_utf
 
                     else:
                         # print 'Texto plano'
@@ -87,12 +93,13 @@ def recibir_email(config):
                             attachments.append(attach)
 
             else:
+		print "ascii way"
                 for part in email.walk():
                     parte=''
                     if part.get_content_type()=="text/html" or part.get_content_type() == "text/plain":
                         print 'html'
                         part = sanitise(part)
-                        parte = part.get_payload(decode=True)
+                        parte_ascii = unicode(part.get_payload(decode=True))
                     else:
                         # print 'Texto plano'
                         # part = sanitise(part)
@@ -103,6 +110,14 @@ def recibir_email(config):
                             attachments.append(attach)
 
             #Se guarda una instancia del Mail
+	    print "titulo",tit
+	    print "detalle", parte	
+	    print "connect db..."
+	    try:
+	        db.connect()
+	    except Exception, e:
+                print "DB re Connect error", e
+	    print "db ok"
             cuenta = config.nombre
             noti = NotificadorExterno()
             noti.creado_por =1
@@ -114,16 +129,23 @@ def recibir_email(config):
             noti.actividad = 'Email'
             noti.estado = 1
             noti.e_mail = parseaddr(email['From'])[1]
-            noti.detalle = parte
+	    try:
+                noti.detalle = parte_utf or parte_ascii or parte
+	    except Exception, e:
+		print "error detalle", e
+                noti.detalle = ""
             
             try:
                 '''if NotificadorExterno.select().where():
                     print 'YA EXISTE'
                 else:'''
+		print "pre save", noti.e_mail
                 noti.save()
+		print "save ok!"
                 print noti.id
                 print 'Se grabo!!!'
                 auditable = []
+		print "adjuntos:", attachments
                 for attach in attachments:
                     print "save attach!"
                     folder = get_folder(noti.id)
@@ -135,13 +157,14 @@ def recibir_email(config):
                 if auditable:
                     noti.adjuntos = "\n".join(auditable)
                     noti.save()
+		    print "save auditable"
 
 
             except Exception, e: 
                 print ('NO SE GRABO!!!!')
                 print repr(e)
         except Exception, e:
-                print e
+                print "ERROR en el while:", e
 
 
     poplist = m.list()
@@ -255,6 +278,7 @@ def save_attach_db(email_id, name, file_path):
 
 def create_attach_link(attach):
     attach.link = WEB_URL + "/email/adjunto/"+ str(attach.id) + "/"
+    print "attach link", link
     attach.save()
     """2017-04-11 23:08"""
     fecha = datetime.now().strftime("%Y-%m-%d %H:%M")
