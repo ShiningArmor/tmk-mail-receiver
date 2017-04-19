@@ -199,9 +199,9 @@ def recibir_email(config):
         for msgspec in msglist :
             # msgspec is something like "3 3941", 
             # msg number and size in octets
-            #msgnum = int(msgspec.split(' ')[0])
-            #print "Deleting msg %d\r" % msgnum,
-            #m.dele(msgnum)
+            msgnum = int(msgspec.split(' ')[0])
+            print "Deleting msg %d\r" % msgnum,
+            m.dele(msgnum)
             print "non deleted -fork"
         else :
             print "No messages for"
