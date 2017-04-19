@@ -39,11 +39,20 @@ def recibir_email(config):
     m.user(config.email)
     m.pass_(config.clave_email)
     #contar mails sin leer
-    numero = len(m.list()[1])
-    print (numero)
+
+
     #obtener los mensajes para analizarlos
     attachments = []
+
+    msglist = []
+    poplist = m.list()
+    if not poplist[0].startswith('+OK'):
+        msglist = poplist[1]
+
+    numero = len(msglist)
+    print (numero)
     for i in range (numero):
+
         print "Mensaje numero"+str(i+1)
         print "--------------------"
         # Se lee el mensaje y se parsea el mje
@@ -65,59 +74,75 @@ def recibir_email(config):
             #''.join([ unicode(t[0], t[1] or default_charset) for t in dh ])
             #Si es compuesto con HTML o texto plano ascii
             # default_charset = 'ascii'
-	    default_charset = 'utf-8'
+
             tit = decode_header(email['Subject'])
+            default_charset = 'ASCII'
             tipo_mail = tit[0][1]
-            if tit[0][1]=='utf-8' or tit[0][1]==None:
-		print "utf8 way"
-                t = unicode("")
-		tit = t.join([ unicode(t[0], t[1] or default_charset) for t in tit ])
-                es_utf8= True
-                for part in email.walk():
-                    parte=''
-                    print "content type:", part.get_content_type()
-		    if part.get_content_type()=="text/html" or part.get_content_type() == "text/plainXXX":
+
+            t_ = unicode("")
+            tit = t_.join([ unicode(t[0], t[1] or default_charset) for t in tit ])
+            is_html = False
+            for part in email.walk():
+                parte=''
+                print "content type:", part.get_content_type()
+                if part.get_content_type()=="text/html" or part.get_content_type() == "text/plain":
+                    if part.get_content_type()=="text/html":
+                        is_html = True
+
+                        charset = part.get_content_charset()
+                        print "charset.", charset
                         print part.get_content_type()
-			print "part pre sanitise", part
+                        print "part pre sanitise", part
                         part = sanitise(part)
-                        parte_utf = unicode(part.get_payload(decode=True).decode(part.get_content_charset()))
-			print "part post sanitise", parte_utf
+                        parte_utf = unicode(part.get_payload(decode=True), str(charset), "ignore") \
+                            .encode('utf8', 'replace')
+                        print "part post sanitise", parte_utf
 
-                    else:
-                        # print 'Texto plano'
-                        # part = sanitise(part)
-                        # parte = part.get_payload(decode=True)
-                        print "attach type:", part.get_content_type()
-                        attach = get_attach(part)
-                        if attach:
-                            attachments.append(attach)
-
-            else:
-		print "ascii way"
-                for part in email.walk():
-                    parte=''
-                    if part.get_content_type()=="text/html" or part.get_content_type() == "text/plain":
-                        print 'html'
+                    if not is_html:
+                        charset = part.get_content_charset()
+                        print "charset.", charset
+                        print part.get_content_type()
+                        print "part pre sanitise", part
                         part = sanitise(part)
-                        parte_ascii = unicode(part.get_payload(decode=True))
-                    else:
-                        # print 'Texto plano'
-                        # part = sanitise(part)
-                        # parte = part.get_payload(decode=True)
-                        print "attach type:", part.get_content_type()
-                        attach = get_attach(part)
-                        if attach:
-                            attachments.append(attach)
+                        parte_utf = unicode(part.get_payload(decode=True), str(charset), "ignore")\
+                                        .encode('utf8', 'replace')
+                        print "part post sanitise", parte_utf
+
+                else:
+                    # print 'Texto plano'
+                    # part = sanitise(part)
+                    # parte = part.get_payload(decode=True)
+                    print "attach type:", part.get_content_type()
+                    attach = get_attach(part)
+                    if attach:
+                        attachments.append(attach)
+
+                     #    else:
+                     # print "ascii way"
+                     #        for part in email.walk():
+                     #            parte=''
+                     #            if part.get_content_type()=="text/html" or part.get_content_type() == "text/plain":
+                     #                print 'html'
+                     #                part = sanitise(part)
+                     #                parte_ascii = unicode(part.get_payload(decode=True))
+                     #            else:
+                     #                # print 'Texto plano'
+                     #                # part = sanitise(part)
+                     #                # parte = part.get_payload(decode=True)
+                     #                print "attach type:", part.get_content_type()
+                     #                attach = get_attach(part)
+                     #                if attach:
+                     #                    attachments.append(attach)
 
             #Se guarda una instancia del Mail
-	    print "titulo",tit
-	    print "detalle", parte	
-	    print "connect db..."
-	    try:
-	        db.connect()
-	    except Exception, e:
+	        print "titulo",tit
+            print "detalle", parte_utf
+            print "connect db..."
+            try:
+                db.connect()
+            except Exception, e:
                 print "DB re Connect error", e
-	    print "db ok"
+            print "db ok"
             cuenta = config.nombre
             noti = NotificadorExterno()
             noti.creado_por =1
@@ -129,23 +154,23 @@ def recibir_email(config):
             noti.actividad = 'Email'
             noti.estado = 1
             noti.e_mail = parseaddr(email['From'])[1]
-	    try:
-                noti.detalle = parte_utf or parte_ascii or parte
-	    except Exception, e:
-		print "error detalle", e
+            try:
+                noti.detalle = parte_utf
+            except Exception, e:
+                print "error detalle", e
                 noti.detalle = ""
-            
+
             try:
                 '''if NotificadorExterno.select().where():
                     print 'YA EXISTE'
                 else:'''
-		print "pre save", noti.e_mail
+                print "pre save", noti.e_mail
                 noti.save()
-		print "save ok!"
+                print "save ok!"
                 print noti.id
                 print 'Se grabo!!!'
                 auditable = []
-		print "adjuntos:", attachments
+                print "adjuntos:", attachments
                 for attach in attachments:
                     print "save attach!"
                     folder = get_folder(noti.id)
@@ -153,14 +178,14 @@ def recibir_email(config):
                     attach_db = save_attach_db(noti.id, attach.name, pathfile)
                     audit = create_attach_link(attach_db)
                     auditable.append(audit)
-                
-                if auditable:
-                    noti.adjuntos = "\n".join(auditable)
-                    noti.save()
-		    print "save auditable"
+
+                    if auditable:
+                        noti.adjuntos = "\n".join(auditable)
+                        noti.save()
+                        print "save auditable"
 
 
-            except Exception, e: 
+            except Exception, e:
                 print ('NO SE GRABO!!!!')
                 print repr(e)
         except Exception, e:
@@ -174,10 +199,10 @@ def recibir_email(config):
             # msgspec is something like "3 3941", 
             # msg number and size in octets
             msgnum = int(msgspec.split(' ')[0])
-            print "Deleting msg %d\r" % msgnum,
-            m.dele(msgnum)
+            #print "Deleting msg %d\r" % msgnum,
+            #m.dele(msgnum)
         else :
-        	print "No messages for"
+            print "No messages for"
     else :
         print "Couldn't list messages: status", poplist[0]
     m.quit()	
@@ -186,7 +211,16 @@ def recibir_email(config):
 import re
 BAD_CONTENT_RE = re.compile('application/(msword|msexcel)', re.I)
 BAD_FILEEXT_RE = re.compile(r'(\.exe|\.zip|\.pif|\.scr|\.ps|\.doc|\.xls|\.docx|\.xlsx)$')
+ReplaceString = """
 
+This message contained an attachment that was stripped out.
+
+The original type was: %(content_type)s
+The filename was: %(filename)s,
+(and it had additional parameters of:
+%(params)s)
+
+"""
 def sanitise(msg):
     # Strip out all payloads of a particular type
     ct = msg.get_content_type()
