@@ -201,6 +201,7 @@ def recibir_email(config):
             msgnum = int(msgspec.split(' ')[0])
             #print "Deleting msg %d\r" % msgnum,
             #m.dele(msgnum)
+            print "non deleted -fork"
         else :
             print "No messages for"
     else :
