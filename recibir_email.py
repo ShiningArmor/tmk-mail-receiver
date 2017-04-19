@@ -47,7 +47,7 @@ def recibir_email(config):
     msglist = []
     poplist = m.list()
     print poplist
-    if not poplist[0].startswith('+OK'):
+    if poplist[0].startswith('+OK'):
         msglist = poplist[1]
 
     numero = len(msglist)
@@ -199,7 +199,7 @@ def recibir_email(config):
         for msgspec in msglist :
             # msgspec is something like "3 3941", 
             # msg number and size in octets
-            msgnum = int(msgspec.split(' ')[0])
+            #msgnum = int(msgspec.split(' ')[0])
             #print "Deleting msg %d\r" % msgnum,
             #m.dele(msgnum)
             print "non deleted -fork"
