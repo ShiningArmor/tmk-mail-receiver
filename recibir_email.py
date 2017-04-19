@@ -185,7 +185,7 @@ def recibir_email(config):
                         noti.save()
                         print "save auditable"
 
-
+                m.dele(i+1)
             except Exception, e:
                 print ('NO SE GRABO!!!!')
                 print repr(e)
@@ -199,9 +199,9 @@ def recibir_email(config):
         for msgspec in msglist :
             # msgspec is something like "3 3941", 
             # msg number and size in octets
-            msgnum = int(msgspec.split(' ')[0])
-            print "Deleting msg %d\r" % msgnum,
-            m.dele(msgnum)
+            #msgnum = int(msgspec.split(' ')[0])
+            #print "Deleting msg %d\r" % msgnum,
+            #m.dele(msgnum)
             print "non deleted -fork"
         else :
             print "No messages for"
