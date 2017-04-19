@@ -26,10 +26,10 @@ WEB_URL = "http://192.168.0.38:5000"
 
 class Attachement(object):
     def __init__(self):
-        self.data = None;
-        self.content_type = None;
-        self.size = None;
-        self.name = None;
+        self.data = None
+        self.content_type = None
+        self.size = None
+        self.name = None
 
 
 def recibir_email(config):
@@ -46,6 +46,7 @@ def recibir_email(config):
 
     msglist = []
     poplist = m.list()
+    print poplist
     if not poplist[0].startswith('+OK'):
         msglist = poplist[1]
 
@@ -313,7 +314,7 @@ def save_attach_db(email_id, name, file_path):
 
 def create_attach_link(attach):
     attach.link = WEB_URL + "/email/adjunto/"+ str(attach.id) + "/"
-    print "attach link", link
+    print "attach link", attach.link
     attach.save()
     """2017-04-11 23:08"""
     fecha = datetime.now().strftime("%Y-%m-%d %H:%M")
