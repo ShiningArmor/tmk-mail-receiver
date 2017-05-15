@@ -77,12 +77,12 @@ def recibir_email(config):
             #Si es compuesto con HTML o texto plano ascii
             # default_charset = 'ascii'
 
-            tit = unidecode(decode_header(email['Subject']))
+            tit = decode_header(email['Subject'])
             default_charset = 'ASCII'
             tipo_mail = tit[0][1]
 
             t_ = unicode("")
-            tit = t_.join([ unicode(t[0], t[1] or default_charset) for t in tit ])
+            tit = t_.join([ unicode(unidecode(t[0]), t[1] or default_charset) for t in tit ])
             is_html = False
             for part in email.walk():
                 parte=''
