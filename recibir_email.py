@@ -15,6 +15,7 @@ import os
 import json
 from models import db, eg_email as NotificadorExterno, eg_cuenta_de_email as configuracionBPM, email_adjunto_api as AttachAPI
 import poplib
+from unidecode import unidecode
 
 poplib._MAXLINE=20480
 now = datetime.now()
@@ -76,7 +77,7 @@ def recibir_email(config):
             #Si es compuesto con HTML o texto plano ascii
             # default_charset = 'ascii'
 
-            tit = decode_header(email['Subject'])
+            tit = unidecode(decode_header(email['Subject']))
             default_charset = 'ASCII'
             tipo_mail = tit[0][1]
 
@@ -90,7 +91,7 @@ def recibir_email(config):
                     if part.get_content_type()=="text/html":
                         is_html = True
 
-                        charset = part.get_content_charset()
+                        charset = part.get_content_charset(failobj="utf-8")
                         print "charset.", charset
                         print part.get_content_type()
                         print "part pre sanitise", part
