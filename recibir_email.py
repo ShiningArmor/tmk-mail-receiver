@@ -96,7 +96,7 @@ def recibir_email(config):
                         print part.get_content_type()
                         print "part pre sanitise", part
                         part = sanitise(part)
-                        parte_utf = unicode(part.get_payload(decode=True), str(charset), "ignore") \
+                        parte_utf = unicode(part.get_payload(decode=True), str(charset), "ignore")\
                             .encode('utf8', 'replace')
                         print "part post sanitise", parte_utf
 
