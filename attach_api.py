@@ -36,6 +36,11 @@ def hello():
 @app.route('/email/adjunto/<int:key>/')
 def uploaded_file(key):
     try:
+        db.connect()
+        logger.info("#(bold cyan)DB Reconnected")
+    except Exception, e:
+        logger.error("#(bold red)%s" % str(e))
+    try:
         logger.info("#(bold green)__________GET_________________")
         logger.info("#(bold cyan)id adjunto: %s" % str(key))
         attach = AttachAPI.get(AttachAPI.id == key)
