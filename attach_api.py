@@ -35,10 +35,11 @@ def hello():
 
 @app.route('/email/adjunto/<int:key>/')
 def uploaded_file(key):
-    try:
+
         logger.info("#(bold green)__________GET_________________")
         logger.info("#(bold cyan)id adjunto: %s" % str(key))
-        attach = AttachAPI.get(AttachAPI.id == key)
+        attach = get_data_db(key)
+
         full_path = attach.file_path
         folder = full_path[:full_path.rfind("/")]
         file = full_path[full_path.rfind("/") + 1:]
@@ -46,11 +47,21 @@ def uploaded_file(key):
         logger.info("#(bold cyan)carpeta: %s" % str(folder))
         logger.info("#(bold green)___________END_GET____________")
         return send_from_directory(folder, file)
-    except Exception, e:
-        logger.error("#(bold red)___________ERROR_GET___________")
-        logger.error("#(bold red)%s" % str(e))
-        logger.error("#(bold red)___________END_ERROR___________")
-        return str(e)
+
+def get_data_db(key):
+    intentos = 0
+    is_ok = False
+    while not is_ok:
+        try:
+            intentos += 1
+            logger.info("#(bold cyan)intento: %s" % str(intentos))
+            attach = AttachAPI.get(AttachAPI.id == key)
+            is_ok = True
+        except Exception, e:
+            logger.error("#(bold red)Error en consulta en la DB: %s" % str(e))
+            logger.error("#(bold red)Reintentar consulta")
+    return attach
+
 
 
 if __name__ == "__main__":
