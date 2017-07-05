@@ -37,6 +37,7 @@ def hello():
 def uploaded_file(key):
         logger.info("#(bold green)__________GET_________________")
         logger.info("#(bold cyan)id adjunto: %s" % str(key))
+
         #attach = get_data_db(key)
         logger.debug("get_data func:")
         attach = get_data(key, logger)

@@ -17,7 +17,7 @@ def get_data(key_id, logger):
     try:
         with connection.cursor() as cursor:
             # Read a single record
-            sql = "SELECT * FROM `email_adjunto_api` WHERE id_email = %s" % str(key_id)
+            sql = "SELECT * FROM `eg_email_adjunto_api` WHERE id_email = %s" % str(key_id)
             cursor.execute(sql)
             result = cursor.fetchone()
         logger.debug(str(result))

@@ -38,7 +38,7 @@ class eg_cuenta_de_email(peewee.Model):
     class Meta:
         database = db
 
-class email_adjunto_api(peewee.Model):
+class eg_email_adjunto_api(peewee.Model):
     id = peewee.IntegerField()
     id_email = peewee.IntegerField()
     file_path = peewee.CharField()
